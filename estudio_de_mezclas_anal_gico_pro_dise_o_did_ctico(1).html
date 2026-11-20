@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Estudio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ================= BARRA SUPERIOR ================= -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-badge">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round">
+          <line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line>
+          <line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line>
+          <line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line>
+          <line x1="17" y1="16" x2="23" y2="16"></line>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-title">Estudio</div>
+        <div class="brand-sub" id="engine-status">WEB AUDIO API · EN ESPERA · 0 CABLES</div>
+        <div class="audio-diag" id="audio-diag" title="Haz clic para activar el audio o ver qué falta para escuchar sonido">Pulsa "Auto-conectar" para escuchar el estudio</div>
+      </div>
+    </div>
+
+    <div class="toolbar-actions">
+      <button id="btn-power" class="btn btn-power">
+        <span class="led-dot" id="power-led"></span>
+        <span>Encender Audio</span>
+      </button>
+
+      <button id="btn-audio-test" class="btn" title="Emite un tono breve directo a tus altavoces para comprobar que el navegador reproduce sonido">
+        <span>Test</span>
+      </button>
+
+      <button id="btn-autoconnect" class="btn btn-auto" title="Conecta todo el esquema automáticamente">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        <span>Auto-conectar</span>
+      </button>
+
+      <button id="btn-cable-vis" class="btn" title="Atenuar cables para ver mejor las etiquetas y mover perillas">
+        <span>Cables: 100%</span>
+      </button>
+
+      <button id="btn-clear-cables" class="btn btn-danger">
+        <span>Quitar Cables</span>
+      </button>
+
+      <div class="listen-switch" role="group" aria-label="Selector de escucha">
+        <button id="listen-spk" class="listen-opt active">SPK 1/2</button>
+        <button id="listen-phones" class="listen-opt">Cascos / PFL</button>
+      </div>
+
+      <button id="btn-theme" class="btn" title="Alternar entre consola oscura y fondo claro">
+        <span>Modo Claro</span>
+      </button>
+
+      <button id="btn-guide" class="btn">
+        <span>Conexiones</span>
+      </button>
+      <button id="btn-diagram" class="btn">
+        <span>Diagrama</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="studio-wrapper">
+    <div class="studio-stage" id="studio-stage">
+
+      <!-- Capa SVG de cables físicos -->
+      <svg id="cable-layer"></svg>
+
+    
+      <section class="top-row">
+
+        <!-- 1. MIC A (Condensador + XLRH + Requiere +48V + Mic Real) -->
+        <div class="gear-card">
+          <div class="gear-header">
+            <span class="gear-title">Mic A</span>
+            <span class="gear-tag">Condensador</span>
+          </div>
+          <div class="phantom-pill" id="mica-phantom-status">SIN +48V</div>
+          <svg width="46" height="54" viewBox="0 0 64 74">
+            <defs>
+              <linearGradient id="condGrad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#64748b"/><stop offset="50%" stop-color="#f1f5f9"/><stop offset="100%" stop-color="#475569"/>
+              </linearGradient>
+            </defs>
+            <rect x="20" y="6" width="24" height="28" rx="11" fill="url(#condGrad)" stroke="#334155" stroke-width="1.6"/>
+            <line x1="21" y1="15" x2="43" y2="15" stroke="#475569" stroke-width="1"/>
+            <line x1="21" y1="23" x2="43" y2="23" stroke="#475569" stroke-width="1"/>
+            <rect x="22" y="34" width="20" height="24" rx="3" fill="#475569" stroke="#334155" stroke-width="1.2"/>
+            <rect x="27" y="58" width="10" height="10" rx="2" fill="#1e293b" stroke="#64748b"/>
+            <circle cx="32" cy="44" r="2.6" fill="#22c55e" id="svg-mica-led" opacity="0.2"/>
+          </svg>
+          <div style="display:flex; gap:4px; margin:4px 0;">
+            <button class="mini-btn" id="btn-src-mica">▶ Voz</button>
+            <button class="mini-btn" id="btn-src-mica-live" title="Usa tu micrófono real del ordenador">Real</button>
+          </div>
+          <div class="jack-wrap">
+            <div class="jack xlr" data-jack-id="micA_out" data-dir="out" data-type="xlr" data-name="Mic A (Condensador) — Salida XLR (Requiere activar +48V en el canal)">
+              <div class="xlr-pins"><span></span><span></span><span></span></div>
+            </div>
+            <span class="jack-label">XLRH</span>
+          </div>
+        </div>
+
+        <!-- 2. MIC B (Dinámico + XLRM) -->
+        <div class="gear-card">
+          <div class="gear-header">
+            <span class="gear-title">Mic B</span>
+            <span class="gear-tag">Dinámico</span>
+          </div>
+          <svg width="44" height="58" viewBox="0 0 56 74">
+            <circle cx="28" cy="19" r="13" fill="#94a3b8" stroke="#334155" stroke-width="1.6"/>
+            <rect x="16" y="18" width="24" height="3" fill="#1e293b"/>
+            <path d="M21 31 L35 31 L32 62 L24 62 Z" fill="#1f2937" stroke="#475569" stroke-width="1.2"/>
+            <circle cx="28" cy="43" r="2.4" fill="#22c55e" id="svg-micb-led" opacity="0.2"/>
+          </svg>
+          <div style="margin:4px 0;">
+            <button class="mini-btn" id="btn-src-micb">▶ Batería</button>
+          </div>
+          <div class="jack-wrap">
+            <div class="jack xlr" data-jack-id="micB_out" data-dir="out" data-type="xlr" data-name="Mic B (Dinámico) — Salida XLRM (Batería)">
+              <div class="xlr-pins"><span></span><span></span><span></span></div>
+            </div>
+            <span class="jack-label">XLRM</span>
+          </div>
+        </div>
+
+        <!-- 3. Micrófono Bluetooth -->
+        <div class="gear-card" id="bt-mic-indicator">
+          <div class="gear-header">
+            <span class="gear-title">Micrófono</span>
+            <span class="gear-tag">BT</span>
+          </div>
+          <svg width="46" height="58" viewBox="0 0 64 74">
+            <circle cx="26" cy="18" r="11.5" fill="#1e293b" stroke="#64748b" stroke-width="1.5"/>
+            <rect x="20" y="29" width="12" height="33" rx="4" fill="#111827" stroke="#4b5563" stroke-width="1.2"/>
+            <rect x="22.5" y="38" width="7" height="10" rx="1" fill="#0c4a6e" stroke="#38bdf8" stroke-width="0.8"/>
+            <circle cx="26" cy="54" r="2.3" fill="#22c55e" id="svg-micc-led" opacity="0.2"/>
+            <path class="bt-wave" d="M40 46 Q46 50 40 54" fill="none" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round"/>
+            <path class="bt-wave" d="M45 42 Q53 50 45 58" fill="none" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round"/>
+            <path class="bt-wave" d="M50 38 Q61 50 50 62" fill="none" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <div style="margin:4px 0;">
+            <button class="mini-btn" id="btn-src-micc" title="Encender o apagar el micrófono Bluetooth">▶ Mic</button>
+          </div>
+          <span class="bt-status" id="bt-mic-status">SIN ENLACE</span>
+        </div>
+
+        <!-- 4. Receptor/adaptador Bluetooth con salida a CH 4 -->
+        <div class="gear-card" id="bt-adapter-indicator">
+          <div class="gear-header">
+            <span class="gear-title">Adaptador</span>
+            <span class="gear-tag">BT RX</span>
+          </div>
+          <svg class="bt-receiver-icon" width="58" height="48" viewBox="0 0 72 56" aria-hidden="true">
+            <rect x="8" y="19" width="48" height="27" rx="5" fill="#171d27" stroke="#38bdf8" stroke-width="1.5"/>
+            <path d="M20 19 L17 8 M17 8 L14 4 M17 8 L21 4" fill="none" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M36 24 L44 31 L36 38 L36 24 L44 31 L36 38 M36 31 L29 24 M36 31 L29 38" fill="none" stroke="#7dd3fc" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="49" cy="27" r="2" fill="#64748b"/>
+          </svg>
+          <span class="bt-status" id="bt-adapter-status">SIN ENLACE</span>
+          <div class="jack-wrap" style="margin-top:5px;">
+            <div class="jack trs ring-blue" data-jack-id="bt_rx_out" data-dir="out" data-type="any" data-name="Adaptador Bluetooth — Salida de audio TRS hacia CH 4 Line"></div>
+            <span class="jack-label blue">TRS OUT</span>
+          </div>
+        </div>
+
+        <!-- 5. MP3 - TRSH Btn (Con carga de archivos MP3/WAV reales) -->
+        <div class="gear-card">
+          <div class="gear-header">
+            <span class="gear-title">MP3 - TRSH</span>
+            <span class="gear-tag">Btn / USB</span>
+          </div>
+          <div class="mp3-screen">
+            <div class="mp3-track-name" id="mp3-track-name">PISTA_DEMO_112BPM</div>
+            <div id="mp3-time-txt" style="font-size:8px; opacity:0.85;">PAUSA · INTERNO</div>
+            <div class="mp3-progress"><div class="mp3-progress-bar" id="mp3-progress-bar"></div></div>
+          </div>
+          <div style="display:flex; gap:4px; width:100%; justify-content:center; margin:4px 0;">
+            <button class="mini-btn" id="btn-src-mp3">▶ Play</button>
+            <label class="mini-btn blue-on" style="cursor:pointer;" title="Cargar cualquier canción MP3 o WAV real desde tu ordenador">
+              MP3/WAV
+              <input type="file" id="file-mp3-input" accept="audio/*" style="display:none;" />
+            </label>
+          </div>
+          <div class="jack-wrap">
+            <div class="jack trs ring-purple" data-jack-id="mp3_out" data-dir="out" data-type="any" data-name="MP3 - TRSH Btn — Salida de Línea TRS (Conectar a Line de un canal)"></div>
+            <span class="jack-label purple">TRS OUT</span>
+          </div>
+        </div>
+
+        <!-- 6. EXPANSOR (Con in y out en la parte INFERIOR, igual que en tu dibujo) -->
+        <div class="gear-card">
+          <div class="gear-header">
+            <span class="gear-title">Expansor</span>
+            <div style="display:flex; align-items:center; gap:5px;">
+              <button class="mini-btn active" id="btn-exp-bypass" style="padding:2px 5px; font-size:8.5px;">ON</button>
+              <span class="led-dot" id="exp-gate-led" title="Ámbar: puerta cerrada · Verde: señal abierta"></span>
+            </div>
+          </div>
+
+          <div style="display:flex; align-items:center; justify-content:space-around; width:100%; background:#11151d; border:1px solid #2b3444; border-radius:8px; padding:6px 4px; margin:3px 0;">
+            <div class="knob-group">
+              <div class="knob-ring sm color-amber" data-knob="exp_thresh" data-min="-60" data-max="-5" data-val="-32" data-unit="dB"><div class="knob-cap"></div></div>
+              <span class="knob-label">THRESH</span>
+            </div>
+            <div class="knob-group">
+              <div class="knob-ring sm color-amber" data-knob="exp_ratio" data-min="1" data-max="10" data-val="3.5" data-unit=":1"><div class="knob-cap"></div></div>
+              <span class="knob-label">RATIO</span>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:center; gap:3px;">
+              <span style="font-size:7.5px; font-family:var(--font-mono); color:#94a3b8;">GATE</span>
+              <div class="vu-meter horizontal" id="exp-vu" style="width:46px;"></div>
+            </div>
+          </div>
+
+          <!-- in y out abajo, exacto a tu dibujo -->
+          <div style="width:100%; display:flex; align-items:center; justify-content:space-between; padding:2px 14px 0;">
+            <div class="jack-wrap">
+              <div class="jack trs ring-amber" data-jack-id="exp_in" data-dir="in" data-type="any" data-name="Expansor — Entrada (in) · Insertar en 'ins' de un canal"></div>
+              <span class="jack-label amber">in</span>
+            </div>
+            <div class="jack-wrap">
+              <div class="jack trs ring-amber" data-jack-id="exp_out" data-dir="out" data-type="any" data-name="Expansor — Salida (out) · Volver al 'ins' del canal"></div>
+              <span class="jack-label amber">out</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7. SPK 1 (Altavoz Izquierdo, con 'in' abajo a la izquierda como tu dibujo) -->
+        <div class="gear-card">
+          <div class="gear-header">
+            <span class="gear-title" style="color:#3b82f6;">SPK 1</span>
+            <span class="led-dot" id="spk1-led"></span>
+          </div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:5px; margin:2px 0;">
+            <div class="tweeter"></div>
+            <div class="woofer-ring"><div class="woofer-cone" id="woofer-1"><div class="woofer-cap"></div></div></div>
+          </div>
+          <div style="width:100%; display:flex; align-items:center; justify-content:space-between; padding-top:4px; border-top:1px solid var(--card-border);">
+            <div class="jack-wrap">
+              <div class="jack trs ring-blue" data-jack-id="spk1_in" data-dir="in" data-type="any" data-name="SPK 1 (L) — Entrada de Altavoz"></div>
+              <span class="jack-label blue">in</span>
+            </div>
+            <div class="vu-meter horizontal" id="vu-spk1" style="width:50px;"></div>
+          </div>
+        </div>
+
+        <!-- 8. SPK 2 (Altavoz Derecho, con 'in' abajo a la izquierda como tu dibujo) -->
+        <div class="gear-card">
+          <div class="gear-header">
+            <span class="gear-title" style="color:#3b82f6;">SPK 2</span>
+            <span class="led-dot" id="spk2-led"></span>
+          </div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:5px; margin:2px 0;">
+            <div class="tweeter"></div>
+            <div class="woofer-ring"><div class="woofer-cone" id="woofer-2"><div class="woofer-cap"></div></div></div>
+          </div>
+          <div style="width:100%; display:flex; align-items:center; justify-content:space-between; padding-top:4px; border-top:1px solid var(--card-border);">
+            <div class="jack-wrap">
+              <div class="jack trs ring-blue" data-jack-id="spk2_in" data-dir="in" data-type="any" data-name="SPK 2 (R) — Entrada de Altavoz"></div>
+              <span class="jack-label blue">in</span>
+            </div>
+            <div class="vu-meter horizontal" id="vu-spk2" style="width:50px;"></div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ==================================================================
+           CUERPO PRINCIPAL (EXACTO A TU DIBUJO ORIGINAL)
+           Izquierda/Centro: MESA DE MEZCLAS (Entradas + Salidas)
+           Derecha: Cascos -> Compresor -> Procesador efectos
+           ================================================================== -->
+      <section class="main-area">
+
+        <!-- MESA DE MEZCLAS -->
+        <div class="mixer-chassis">
+          <div class="mixer-top-strip">
+            <div class="mixer-title">
+              <span>MESA DE MEZCLAS ANALÓGICA</span>
+              <span class="mixer-chip">+48V · PEAK LED · PAN · PFL · DSP REAL</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span id="solo-banner" style="display:none; font-size:9.5px; font-family:var(--font-mono); font-weight:800; color:#fbbf24; background:rgba(245,158,11,0.16); border:1px solid #f59e0b; padding:2px 7px; border-radius:5px;">
+                PFL ACTIVO EN CASCOS
+              </span>
+              <button class="mini-btn" id="btn-all-48v" title="Activar o desactivar +48V Phantom en los 4 canales">+48V Todos</button>
+            </div>
+          </div>
+
+          <div class="mixer-body">
+
+            <!-- ENTRADAS (4 Canales en el orden exacto de tu dibujo) -->
+            <div class="entradas-box">
+              <div class="channels-grid" id="mixer-channels">
+                <div class="row-labels">
+                  <div class="row-lbl r-head"></div>
+                  <div class="row-lbl r-mic">Mic</div>
+                  <div class="row-lbl r-line">Line</div>
+                  <div class="row-lbl r-gain">Gain</div>
+                  <div style="display:flex; flex-direction:column; gap:2px; padding:4px 0; margin:3px 0;">
+                    <div class="row-lbl r-eq-item" style="color:#7dd3fc;">LP</div>
+                    <div class="row-lbl r-eq-item" style="color:#7dd3fc;">MP</div>
+                    <div class="row-lbl r-eq-item" style="color:#7dd3fc;">HP</div>
+                  </div>
+                  <div class="row-lbl r-ins" style="color:#fbbf24;">ins</div>
+                  <div class="row-lbl r-fx" style="color:#fca5a5;">FX</div>
+                  <div class="row-lbl r-send" style="color:#86efac;">Send</div>
+                  <div class="row-lbl r-pan" style="color:#94a3b8;">Pan</div>
+                  <div class="row-lbl r-mute">Mute</div>
+                  <div class="row-lbl r-fader">Fader</div>
+                </div>
+                <!-- CH 1 a CH 4 inyectados por JS -->
+              </div>
+              <div class="section-footer-label">Entradas</div>
+            </div>
+
+            <!-- SALIDAS (Distribución y colores exactos de tu dibujo) -->
+            <div class="salidas-box">
+              <!-- Fila superior de conectores: Send (verde), Return (verde), SPK 1 (azul), SPK 2 (azul), Aux 3 (verde) -->
+              <div class="salidas-jacks-row">
+                <div style="display:flex; flex-direction:column; align-items:center; gap:5px;">
+                  <div class="jack-wrap">
+                    <div class="jack trs ring-green" data-jack-id="mix_send" data-dir="out" data-type="any" data-name="Send — Salida de envío hacia Procesador de efectos externo"></div>
+                    <span class="jack-label green">Send</span>
+                  </div>
+                  <div class="knob-group">
+                    <div class="knob-ring sm color-green" data-knob="vol_send" data-min="0" data-max="100" data-val="80" data-unit="%"><div class="knob-cap"></div></div>
+                    <span class="knob-label" style="font-size:7.5px;">VOL</span>
+                  </div>
+                </div>
+
+                <div style="display:flex; flex-direction:column; align-items:center; gap:5px;">
+                  <div class="jack-wrap">
+                    <div class="jack trs ring-green" data-jack-id="mix_return" data-dir="in" data-type="any" data-name="Return — Entrada de retorno desde Procesador externo (suma al Master L/R)"></div>
+                    <span class="jack-label green">Return</span>
+                  </div>
+                  <div class="knob-group">
+                    <div class="knob-ring sm color-green" data-knob="vol_return" data-min="0" data-max="100" data-val="80" data-unit="%"><div class="knob-cap"></div></div>
+                    <span class="knob-label" style="font-size:7.5px;">VOL</span>
+                  </div>
+                </div>
+
+                <div class="jack-wrap">
+                  <div class="jack trs ring-blue" data-jack-id="mix_spk1" data-dir="out" data-type="any" data-name="SPK 1 (Main Mix L) — Salida Principal Izquierda"></div>
+                  <span class="jack-label blue">SPK 1</span>
+                </div>
+
+                <div class="jack-wrap">
+                  <div class="jack trs ring-blue" data-jack-id="mix_spk2" data-dir="out" data-type="any" data-name="SPK 2 (Main Mix R) — Salida Principal Derecha"></div>
+                  <span class="jack-label blue">SPK 2</span>
+                </div>
+
+                <div class="aux3-cluster">
+                  <div class="jack-wrap">
+                    <div class="jack trs ring-green" data-jack-id="mix_aux3" data-dir="out" data-type="any" data-name="Aux 3 (Phones L/R) — Salida estéreo para Cascos (incluye PFL)"></div>
+                    <span class="jack-label green">Aux 3</span>
+                  </div>
+                  <div class="knob-group">
+                    <div class="knob-ring sm color-green" data-knob="vol_aux3" data-min="0" data-max="100" data-val="82" data-unit="%"><div class="knob-cap"></div></div>
+                    <span class="knob-label" style="font-size:7.5px;">VOL</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Cuerpo de Salidas: Columna FX (Rojo) + Columna EQ & Faders Master (Azul) -->
+              <div class="salidas-main-grid">
+
+                <!-- COLUMNA ROJA: FX -->
+                <div class="fx-column">
+                  <div class="fx-red-panel">
+                    <div style="width:100%; display:flex; justify-content:space-between; align-items:center;">
+                      <span style="font-size:12px; font-weight:800; color:#fff;">FX</span>
+                      <span class="led-dot red-on"></span>
+                    </div>
+                    <div class="fx-lcd" id="int-fx-screen" title="Haz clic para cambiar de efecto DSP interno (PRO)">
+                      <div id="int-fx-name">01 · HALL</div>
+                      <div style="font-size:7.5px; color:#fecaca; margin-top:2px;">CLIC: CAMBIAR</div>
+                    </div>
+                    <div class="knob-group">
+                      <div class="knob-ring color-red" data-knob="fx_par" data-min="0" data-max="100" data-val="55" data-unit="%"><div class="knob-cap"></div></div>
+                      <span class="knob-label" style="color:#fee2e2;">PAR / NIVEL</span>
+                    </div>
+                  </div>
+
+                  <!-- Fader Rojo de FX Master alineado abajo como en tu dibujo -->
+                  <div class="fx-fader-panel">
+                    <span style="font-size:9px; font-weight:800; color:#f87171;">FX MASTER</span>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <div class="fader-track-wrap">
+                        <input type="range" class="v-fader red-thumb" id="fader-fx-master" min="0" max="100" value="65" />
+                      </div>
+                      <div class="vu-meter" id="vu-fx"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- COLUMNA AZUL: EQ (2 filas) + 2 Faders Azules (SPK 1 / SPK 2) -->
+                <div class="eq-master-column">
+                  <div class="eq-blue-panel">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                      <span style="font-size:11px; font-weight:800; color:#eff6ff; letter-spacing:0.06em;">EQ</span>
+                      <div style="display:flex; gap:4px;">
+                        <button class="mini-btn blue-on" id="btn-eq-link" style="padding:2px 5px; font-size:8px;" title="Enlazar bandas L y R para moverlas juntas">LINK</button>
+                        <button class="mini-btn" id="btn-eq-bypass" style="padding:2px 5px; font-size:8px;">ON</button>
+                        <button class="mini-btn" id="btn-eq-flat" style="padding:2px 5px; font-size:8px;">FLAT</button>
+                      </div>
+                    </div>
+                    <div class="eq-bank">
+                      <div class="eq-bank-row">
+                        <span class="eq-side-badge">L</span>
+                        <div class="eq-sliders" id="eq-bank-l" style="flex:1;"></div>
+                      </div>
+                    </div>
+                    <div class="eq-bank">
+                      <div class="eq-bank-row">
+                        <span class="eq-side-badge">R</span>
+                        <div class="eq-sliders" id="eq-bank-r" style="flex:1;"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="master-blue-faders">
+                    <div style="width:100%; display:flex; justify-content:space-between; align-items:center;">
+                      <span style="font-size:9px; font-weight:800; color:#dbeafe;">MAIN L / R</span>
+                      <span id="master-db-readout" style="font-size:9px; font-family:var(--font-mono); color:#93c5fd; font-weight:700;">-∞ dBFS</span>
+                    </div>
+                    <div style="display:flex; align-items:center; justify-content:center; gap:8px;">
+                      <div class="vu-meter" id="vu-master-l"></div>
+                      <div style="display:flex; flex-direction:column; align-items:center;">
+                        <div class="fader-track-wrap">
+                          <input type="range" class="v-fader blue-thumb" id="fader-master-l" min="0" max="100" value="80" />
+                        </div>
+                        <span style="font-size:8.5px; font-weight:800; color:#bfdbfe;">SPK 1</span>
+                      </div>
+                      <div style="display:flex; flex-direction:column; align-items:center;">
+                        <div class="fader-track-wrap">
+                          <input type="range" class="v-fader blue-thumb" id="fader-master-r" min="0" max="100" value="80" />
+                        </div>
+                        <span style="font-size:8.5px; font-weight:800; color:#bfdbfe;">SPK 2</span>
+                      </div>
+                      <div class="vu-meter" id="vu-master-r"></div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <div class="section-footer-label">Salidas</div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- COLUMNA DERECHA (EXACTA A TU DIBUJO: Cascos -> Compresor -> Procesador efectos) -->
+        <aside class="right-column">
+
+          <!-- 1. CASCOS (Justo debajo de SPK 1 y SPK 2) -->
+          <div class="rack-card">
+            <div class="gear-header" style="margin-bottom:0;">
+              <span class="gear-title" style="font-size:13.5px;">Cascos</span>
+              <span class="led-dot" id="phones-led"></span>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-around; padding:4px 0;">
+              <svg width="76" height="64" viewBox="0 0 84 72">
+                <path d="M16 42 C16 12, 68 12, 68 42" fill="none" stroke="#64748b" stroke-width="6.5" stroke-linecap="round"/>
+                <rect x="8" y="38" width="14" height="26" rx="6" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+                <rect x="62" y="38" width="14" height="26" rx="6" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+              </svg>
+              <div class="jack-wrap">
+                <div class="jack trs ring-green" data-jack-id="phones_in" data-dir="in" data-type="any" data-name="Cascos — Entrada Estéreo (Conectar a Aux 3)"></div>
+                <span class="jack-label green">in</span>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+              <button class="mini-btn" id="btn-phones-listen" style="flex:1; justify-content:center;">Escuchar Cascos</button>
+              <div class="vu-meter horizontal" id="vu-phones" style="width:62px;"></div>
+            </div>
+          </div>
+
+          <!-- 2. COMPRESOR (Con in y out en la parte SUPERIOR, exacto a tu dibujo) -->
+          <div class="rack-card">
+            <div class="rack-top-jacks">
+              <div class="jack-wrap">
+                <span class="jack-label amber">in</span>
+                <div class="jack trs ring-amber" data-jack-id="comp_in" data-dir="in" data-type="any" data-name="Compresor — Entrada (in) · Úsalo en el 'ins' de un canal o en serie"></div>
+              </div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:3px;">
+                <span style="font-size:13px; font-weight:800; letter-spacing:0.03em;">Compresor</span>
+                <button class="mini-btn active" id="btn-comp-bypass" style="padding:2px 7px; font-size:8.5px;">ON</button>
+              </div>
+              <div class="jack-wrap">
+                <span class="jack-label amber">out</span>
+                <div class="jack trs ring-amber" data-jack-id="comp_out" data-dir="out" data-type="any" data-name="Compresor — Salida (out)"></div>
+              </div>
+            </div>
+
+            <div class="rack-inner-panel">
+              <div class="rack-controls-row">
+                <div class="knob-group">
+                  <div class="knob-ring sm color-amber" data-knob="comp_thresh" data-min="-50" data-max="0" data-val="-22" data-unit="dB"><div class="knob-cap"></div></div>
+                  <span class="knob-label">THRESH</span>
+                </div>
+                <div class="knob-group">
+                  <div class="knob-ring sm color-amber" data-knob="comp_ratio" data-min="1" data-max="20" data-val="6" data-unit=":1"><div class="knob-cap"></div></div>
+                  <span class="knob-label">RATIO</span>
+                </div>
+                <div class="knob-group">
+                  <div class="knob-ring sm" data-knob="comp_attack" data-min="1" data-max="100" data-val="12" data-unit="ms"><div class="knob-cap"></div></div>
+                  <span class="knob-label">ATK</span>
+                </div>
+                <div class="knob-group">
+                  <div class="knob-ring sm color-green" data-knob="comp_makeup" data-min="0" data-max="18" data-val="4" data-unit="dB"><div class="knob-cap"></div></div>
+                  <span class="knob-label">MAKEUP</span>
+                </div>
+              </div>
+              <div style="display:flex; align-items:center; justify-content:space-between; padding-top:4px; border-top:1px solid #262e3d;">
+                <span style="font-size:8.5px; font-family:var(--font-mono); color:#f59e0b; font-weight:700;">REDUCCIÓN (GR)</span>
+                <div class="vu-meter horizontal" id="vu-comp-gr" style="width:128px;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. PROCESADOR EFECTOS (Justo debajo del Compresor, con in y out ARRIBA) -->
+          <div class="rack-card">
+            <div class="rack-top-jacks">
+              <div class="jack-wrap">
+                <span class="jack-label purple">in</span>
+                <div class="jack trs ring-purple" data-jack-id="extfx_in" data-dir="in" data-type="any" data-name="Procesador efectos — Entrada (in) · Conectar desde Send"></div>
+              </div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:3px;">
+                <span style="font-size:12.5px; font-weight:800;">Procesador efectos</span>
+                <button class="mini-btn active" id="btn-extfx-bypass" style="padding:2px 7px; font-size:8.5px;">ON</button>
+              </div>
+              <div class="jack-wrap">
+                <span class="jack-label purple">out</span>
+                <div class="jack trs ring-purple" data-jack-id="extfx_out" data-dir="out" data-type="any" data-name="Procesador efectos — Salida (out) · Conectar a Return"></div>
+              </div>
+            </div>
+
+            <div class="rack-inner-panel">
+              <div class="rack-lcd" id="ext-fx-screen" title="Haz clic para cambiar de efecto">
+                <div id="ext-fx-name">REVERB CATEDRAL</div>
+                <div style="font-size:8px; opacity:0.75; margin-top:2px;">CLIC PARA CAMBIAR ALGORITMO</div>
+              </div>
+              <div class="rack-controls-row">
+                <div class="knob-group" title="En envío paralelo (Send/Return) se usa al 100% Wet para no duplicar la señal seca">
+                  <div class="knob-ring sm color-blue" data-knob="extfx_mix" data-min="0" data-max="100" data-val="100" data-unit="%"><div class="knob-cap"></div></div>
+                  <span class="knob-label">MIX (WET)</span>
+                </div>
+                <div class="knob-group">
+                  <div class="knob-ring sm color-blue" data-knob="extfx_decay" data-min="10" data-max="100" data-val="65" data-unit="%"><div class="knob-cap"></div></div>
+                  <span class="knob-label">DECAY / TIME</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </aside>
+
+      </section>
+
+      <!-- ==================================================================
+           LABORATORIO DE CONSOLA (DESPLEGABLE ABAJO PARA NO ALTERAR EL ESQUEMA)
+           Analizador RTA + Osciloscopio | Generador de Tonos | Grabador Master
+           ================================================================== -->
+      <section class="lab-drawer" id="lab-drawer">
+        <div class="lab-header" id="lab-toggle">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:12px; font-weight:800; letter-spacing:0.05em; text-transform:uppercase;">
+              Laboratorio de Medición — Analizador RTA, Generador de Tonos y Grabador Master
+            </span>
+            <span class="gear-tag" id="lab-state-tag">ABIERTO</span>
+          </div>
+          <span style="font-size:11px; font-weight:700; color:var(--text-muted);" id="lab-chevron">▼ Ocultar para vista limpia</span>
+        </div>
+
+        <div class="lab-body">
+          <!-- RTA + Osciloscopio para visualizar el EQ -->
+          <div class="lab-module">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:11px; font-weight:800; color:#38bdf8;">ANALIZADOR DE ESPECTRO (RTA 20Hz–20kHz)</span>
+              <button class="mini-btn blue-on" id="btn-rta-mode" style="padding:2px 6px; font-size:8.5px;">RTA+OSC</button>
+            </div>
+            <div class="rta-canvas-wrap">
+              <canvas id="rta-canvas"></canvas>
+              <div class="rta-db-badge" id="rta-peak-txt">PEAK: -∞ dBFS</div>
+            </div>
+          </div>
+
+          <!-- Generador de Tonos para pruebas de Gain / Peak / EQ -->
+          <div class="lab-module">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:11px; font-weight:800; color:#fbbf24;">GENERADOR DE PRUEBA</span>
+              <span style="font-size:8.5px; font-family:var(--font-mono); color:#94a3b8;">PRUEBA GAIN/EQ</span>
+            </div>
+            <div style="font-size:10px; color:#94a3b8; line-height:1.35;">
+              Conecta su salida a cualquier <strong>Line</strong> para visualizar cómo afecta el EQ en el RTA o cuándo salta el LED <strong>PEAK</strong>.
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+              <div style="display:flex; flex-direction:column; gap:5px;">
+                <button class="mini-btn" id="btn-gen-sine">1 kHz Seno</button>
+                <button class="mini-btn" id="btn-gen-pink">Ruido Rosa</button>
+              </div>
+              <div class="knob-group">
+                <div class="knob-ring sm color-amber" data-knob="gen_level" data-min="-40" data-max="0" data-val="-14" data-unit="dB"><div class="knob-cap"></div></div>
+                <span class="knob-label">NIVEL</span>
+              </div>
+              <div class="jack-wrap">
+                <div class="jack trs ring-amber" data-jack-id="gen_out" data-dir="out" data-type="any" data-name="Generador de Prueba — Salida TRS (Conectar a Line de cualquier canal)"></div>
+                <span class="jack-label amber">OUT</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Grabador Master Real -->
+          <div class="lab-module">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:11px; font-weight:800; color:#f87171;">GRABADOR DE MEZCLA MASTER</span>
+              <span id="rec-timer" style="font-family:var(--font-mono); font-size:11px; color:#cbd5e1; font-weight:700;">00:00</span>
+            </div>
+            <div style="font-size:10px; color:#94a3b8; line-height:1.35;">
+              Graba en audio real lo que sale por <strong>SPK 1 / SPK 2</strong> y guarda la mezcla terminada.
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button class="btn btn-rec" id="btn-rec-toggle" style="flex:1; justify-content:center;">
+                <span id="rec-btn-label">● REC MEZCLA</span>
+              </button>
+              <a id="btn-rec-download" class="mini-btn active" style="display:none; text-decoration:none; padding:6px 10px;" download="mezcla_estudio.webm">Guardar</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <div id="floating-tooltip"></div>
+  <div id="toast-container"></div>
+
+  <!-- Modal de Conexiones Activas -->
+  <div class="modal-backdrop" id="guide-modal">
+    <div class="modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid #2c3442;">
+        <div>
+          <h3 style="margin:0; font-size:15px;">Resumen de Conexiones</h3>
+          <p style="margin:3px 0 0; font-size:11.5px; color:#94a3b8;">Haz clic en un conector y luego en otro compatible para tender un cable. Haz clic sobre un cable para quitarlo.</p>
+        </div>
+        <button class="btn" id="btn-close-guide">Cerrar</button>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; font-size:11.5px; color:#cbd5e1;">
+        <div style="background:#0e1218; border:1px solid #28303e; border-radius:8px; padding:9px;">
+          <strong style="color:#f87171;">+48V Phantom, Mic XLR y LED PEAK:</strong><br/>
+          Los micrófonos XLR entran a una entrada <code>Mic</code>. <strong>Mic A</strong> (condensador) necesita activar <code>48V</code>. El <strong>Mic BT</strong> transmite al adaptador Bluetooth, conectado por cable a <code>CH 4 Line</code>. Si te pasas con <code>Gain</code>, se enciende el LED <code>PK</code>.
+        </div>
+        <div style="background:#0e1218; border:1px solid #28303e; border-radius:8px; padding:9px;">
+          <strong style="color:#fbbf24;">Dinámica en Serie (`ins` / Insert):</strong><br/>
+          El <strong>Expansor</strong> y el <strong>Compresor</strong> trabajan a nivel de línea en el lazo <code>ins</code> del canal (ej. <code>CH 1 ins → Expansor in</code> y <code>Expansor out → CH 1 ins</code>). Si abres un <code>ins</code> sin cerrarlo, el canal queda en silencio.
+        </div>
+        <div style="background:#0e1218; border:1px solid #28303e; border-radius:8px; padding:9px;">
+          <strong style="color:#4ade80;">Efectos en Paralelo (`Send` / `Return`):</strong><br/>
+          Conecta <code>Send → Procesador in</code> y <code>Procesador out → Return</code>. Ajusta el nivel maestro con <code>Send VOL</code> y <code>Return VOL</code> (con el procesador al 100 % Wet).
+        </div>
+        <div style="background:#0e1218; border:1px solid #28303e; border-radius:8px; padding:9px;">
+          <strong style="color:#38bdf8;">Escucha (`SPK 1/2` y `Aux 3 → Cascos`):</strong><br/>
+          Conecta <code>SPK 1/2</code> a los monitores y <code>Aux 3</code> a <strong>Cascos</strong>. Pulsa <code>PFL</code> en un canal para aislarlo en Cascos sin afectar la sala.
+        </div>
+      </div>
+
+      <div style="font-size:12px; font-weight:700; margin-bottom:6px;">
+        Cables Conectados (<span id="modal-cable-count">0</span>)
+      </div>
+      <div class="flow-list" id="modal-flow-list"></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="diagram-modal">
+    <div class="modal-card diagram-modal-card">
+      <div class="diagram-modal-header">
+        <div>
+          <h3>Flujo de señal</h3>
+          <p>Resumen del recorrido del audio por la mesa, los efectos y las salidas.</p>
+        </div>
+        <button class="btn" id="btn-close-diagram">Cerrar</button>
+      </div>
+      <div class="diagram-scroll">
+      <svg class="signal-diagram" viewBox="0 0 1120 560" role="img" aria-labelledby="signal-diagram-title signal-diagram-desc">
+        <title id="signal-diagram-title">Diagrama de flujo de señal del estudio</title>
+        <desc id="signal-diagram-desc">Las fuentes entran a los canales, se procesan y llegan a la mezcla principal, los efectos, los monitores y los cascos.</desc>
+        <defs>
+          <marker id="diagram-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 Z" fill="#94a3b8"></path>
+          </marker>
+          <marker id="diagram-arrow-blue" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 Z" fill="#38bdf8"></path>
+          </marker>
+        </defs>
+        <rect class="diagram-bg" x="0" y="0" width="1120" height="560" rx="12"></rect>
+
+        <g class="diagram-node diagram-source">
+          <rect x="20" y="35" width="170" height="72" rx="10"></rect>
+          <text x="105" y="64" text-anchor="middle" class="diagram-title">Mic A / Mic B</text>
+          <text x="105" y="86" text-anchor="middle" class="diagram-subtitle">XLR → CH 1 / CH 2</text>
+        </g>
+        <g class="diagram-node diagram-source">
+          <rect x="20" y="135" width="170" height="72" rx="10"></rect>
+          <text x="105" y="164" text-anchor="middle" class="diagram-title">Micrófono BT</text>
+          <text x="105" y="186" text-anchor="middle" class="diagram-subtitle">Transmisión inalámbrica</text>
+        </g>
+        <g class="diagram-node diagram-source">
+          <rect x="210" y="135" width="170" height="72" rx="10"></rect>
+          <text x="295" y="164" text-anchor="middle" class="diagram-title">Adaptador BT</text>
+          <text x="295" y="186" text-anchor="middle" class="diagram-subtitle">Salida TRS → CH 4 Line</text>
+        </g>
+        <g class="diagram-node diagram-source">
+          <rect x="20" y="250" width="170" height="72" rx="10"></rect>
+          <text x="105" y="279" text-anchor="middle" class="diagram-title">MP3 / WAV</text>
+          <text x="105" y="301" text-anchor="middle" class="diagram-subtitle">Line → CH 3</text>
+        </g>
+
+        <g class="diagram-node diagram-channel">
+          <rect x="430" y="70" width="260" height="255" rx="12"></rect>
+          <text x="560" y="103" text-anchor="middle" class="diagram-title">CANALES 1–4</text>
+          <text x="455" y="144" class="diagram-copy">Mic / Line → Gain → EQ</text>
+          <text x="455" y="174" class="diagram-copy">→ Insert → Mute</text>
+          <text x="455" y="204" class="diagram-copy">→ Fader → Pan → Main L/R</text>
+          <line x1="455" y1="225" x2="665" y2="225" class="diagram-divider"></line>
+          <text x="455" y="255" class="diagram-subtitle">Envíos de canal:</text>
+          <text x="455" y="280" class="diagram-copy">FX interno y Send externo</text>
+        </g>
+
+        <g class="diagram-node diagram-fx">
+          <rect x="760" y="35" width="160" height="100" rx="10"></rect>
+          <text x="840" y="68" text-anchor="middle" class="diagram-title">FX interno</text>
+          <text x="840" y="91" text-anchor="middle" class="diagram-subtitle">Reverb · Delay · Chorus</text>
+          <text x="840" y="115" text-anchor="middle" class="diagram-subtitle">FX Master → Main</text>
+        </g>
+        <g class="diagram-node diagram-fx">
+          <rect x="760" y="185" width="160" height="100" rx="10"></rect>
+          <text x="840" y="216" text-anchor="middle" class="diagram-title">Send / Return</text>
+          <text x="840" y="241" text-anchor="middle" class="diagram-subtitle">Procesador externo</text>
+          <text x="840" y="264" text-anchor="middle" class="diagram-subtitle">Return VOL → Main</text>
+        </g>
+        <g class="diagram-node diagram-master">
+          <rect x="760" y="360" width="160" height="88" rx="10"></rect>
+          <text x="840" y="394" text-anchor="middle" class="diagram-title">MAIN MIX L/R</text>
+          <text x="840" y="419" text-anchor="middle" class="diagram-subtitle">Master Fader + VU</text>
+        </g>
+        <g class="diagram-node diagram-output">
+          <rect x="970" y="325" width="130" height="78" rx="10"></rect>
+          <text x="1035" y="357" text-anchor="middle" class="diagram-title">SPK 1 / 2</text>
+          <text x="1035" y="380" text-anchor="middle" class="diagram-subtitle">Monitores</text>
+        </g>
+        <g class="diagram-node diagram-output">
+          <rect x="970" y="460" width="130" height="78" rx="10"></rect>
+          <text x="1035" y="492" text-anchor="middle" class="diagram-title">Cascos</text>
+          <text x="1035" y="515" text-anchor="middle" class="diagram-subtitle">Aux 3 + PFL</text>
+        </g>
+
+        <path class="diagram-path" d="M190 71 H340 V125 H430"></path>
+        <path class="diagram-path diagram-path-bt" d="M190 171 H210"></path>
+        <path class="diagram-path diagram-path-bt" d="M380 171 H405 V225 H430"></path>
+        <path class="diagram-path" d="M190 286 H340 V260 H430"></path>
+        <path class="diagram-path diagram-path-fx" d="M690 120 H730 V85 H760"></path>
+        <path class="diagram-path diagram-path-send" d="M690 180 H730 V235 H760"></path>
+        <path class="diagram-path" d="M690 265 H730 V405 H760"></path>
+        <path class="diagram-path diagram-path-fx" d="M920 85 H940 V345 H800 V360"></path>
+        <path class="diagram-path diagram-path-send" d="M920 235 H950 V345 H880 V360"></path>
+        <path class="diagram-path" d="M920 404 H970"></path>
+        <path class="diagram-path diagram-path-phone" d="M840 448 V499 H970"></path>
+        <path class="diagram-path diagram-path-phone" d="M690 300 H740 V520 H970"></path>
+
+        <text x="35" y="420" class="diagram-note">Micrófono BT → receptor conectado por cable a CH 4 Line.</text>
+        <text x="35" y="445" class="diagram-note">PFL monitoriza canales seleccionados en cascos sin cambiar el Main Mix.</text>
+      </svg>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
